@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="co.company.spring.dao.EmpMapper">
+
+
+	<!-- 부서별 사원수 부서번호, 부서명, 사원수 -->
+	<select id="getStatDept" resultType="map">
+	SELECT A.DEPARTMENT_ID "deptId" ,
+	B.DEPARTMENT_NAME "deptName" , 
+	COUNT(*) 			"cnt"
+	FROM EMPLOYEES A , DEPARTMENTS B
+	WHERE A.DEPARTMENT_ID = B.DEPARTMENT_ID
+	group by A.DEPARTMENT_ID,B.DEPARTMENT_NAME
+	</select>
+
+
+	<update id="updateEmp">
+		update employees
+		<set>
+			<if test="firstName !=null">first_name=#{firstName},</if>
+			<if test="lastName !=null">last_name=#{lastName},</if>
+			<if test="email !=null">email=#{email}</if>
+		</set>
+		where employee_id=#{employeeId}
+	</update>
+	<!-- 단건조회 -->
+	<select id="getEmp" parameterType="emp" resultType="emp">
+		SELECT
+		employee_id,
+		department_id,
+		salary,
+		first_name,
+		last_name,
+		email,
+		hire_date,
+		job_id
+		FROM employees
+		WHERE
+		employee_id = #{employeeId}
+	</select>
+	<!-- 전체 레코드 건수 -->
+
+	<select id="getCount" resultType="int">
+		select count(*) from employees
+		<where>
+			<if test="firstName != null and firstName !=''">
+				upper(first_name) like '%' || upper(#{firstName}) || '%'
+			</if>
+			<if test="departmentId != null and departmentId !=''">
+				and department_id=#{departmentId}
+			</if>
+			<if test="minSalary != null">
+		   	<![CDATA[and salary >= #{minSalary} ]]>
+			</if>
+			<if test="maxSalary != null">
+		   	<![CDATA[and salary <= #{maxSalary} ]]>
+			</if>
+		</where>
+	</select>
+
+	<!-- 전체조회 -->
+	<select id="getEmpList" resultType="emp">
+		SELECT *
+		FROM employees
+		<where>
+			<if test="firstName != null and firstName !=''">
+				upper(first_name) like '%' || upper(#{firstName}) || '%'
+			</if>
+			<if test="departmentId != null and departmentId !=''">
+				and department_id=#{departmentId}
+			</if>
+			<if test="minSalary != null">
+		   	<![CDATA[and salary >= #{minSalary} ]]>
+			</if>
+			<if test="maxSalary != null">
+		   	<![CDATA[and salary <= #{maxSalary} ]]>
+			</if>
+
+		</where>
+	</select>
+	<!--프로시저 사원등록 -->
+	<insert id="insertEmpProc" statementType="CALLABLE">
+		{call INS_EMP(
+		#{lastName},#{email},#{jobId},
+		#{msg, mode=OUT, jdbcType=VARCHAR, javaType=string},
+		#{employeeId, mode=OUT, jdbcType=VARCHAR, javaType=string}
+
+		)}
+	</insert>
+
+	<!-- 사원등록 -->
+	<insert id="insertEmp" parameterType="emp">
+		<selectKey order="BEFORE" keyProperty="employeeId"
+			resultType="string">
+			select nvl(max(employee_id),0)+1
+			from employees
+		</selectKey>
+		INSERT INTO EMPLOYEES ( employee_id,
+		first_name,
+		last_name,
+		email,
+		hire_date,
+		job_id
+		)
+		VALUES(
+		#{employeeId},
+		#{firstName},
+		#{lastName},
+		#{email},
+		#{hireDate},
+		#{jobId})
+	</insert>
+	<!--단건삭제 -->
+	<delete id="deleteEmp">
+		delete employees
+		where employee_id = #{employeeId}
+	</delete>
+	<!--선택한 단건 삭제 -->
+	<delete id="deleteMultiEmp">
+		delete employees
+		where employee_id in
+		<foreach collection="list" item="id" open="(" close=")"
+			separator=",">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<!-- jobid select -->
+	<select id="jobSelect" resultType="co.company.spring.dao.Jobs">
+	select job_id, job_title 
+	from jobs
+	order by job_id
+	</select>
+	
+	<!--  departmentID select option-->
+	<select id="deptSelect" resultType="co.company.spring.dao.Dept">
+	select department_id, department_name 
+	from departments
+	order by department_id
+	</select>
+	
+</mapper>
