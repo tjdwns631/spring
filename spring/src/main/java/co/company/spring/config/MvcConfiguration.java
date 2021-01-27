@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
@@ -14,15 +15,16 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
+import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import co.company.spring.common.AuthCheckInterceptor;
-import oracle.sql.Mutable;
 
 
 @Configuration
 @EnableWebMvc
 @EnableAspectJAutoProxy(proxyTargetClass = true)
+@EnableScheduling
 public class MvcConfiguration implements WebMvcConfigurer {
 
 	/**
@@ -96,5 +98,11 @@ public class MvcConfiguration implements WebMvcConfigurer {
 		return multi;
 		
 	}
-	
+	@Bean
+	BeanNameViewResolver beanNameViewResolver() {
+		BeanNameViewResolver bean = new BeanNameViewResolver();
+		bean.setOrder(1);
+		
+		return bean;
+	}
 }

@@ -8,6 +8,7 @@
         <title>Home</title>
     </head>
     <body>
+    카카오 : ${kemail }  ${kname }
         <h1>Hello World!</h1>
         <p>This is the homepage!</p>
     </body>
